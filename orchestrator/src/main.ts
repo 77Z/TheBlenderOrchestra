@@ -12,7 +12,7 @@ const wss = new WebSocketServer({ port: 8080 });
 // 	win?.webContents.send("ws-listening");
 // });
 
-wss.on("connection", (ws, request, client: any) => {
+/* wss.on("connection", (ws, request, client: any) => {
 	ws.on("error", console.error);
 
 	ws.on("message", (data) => {
@@ -20,7 +20,7 @@ wss.on("connection", (ws, request, client: any) => {
 	});
 
 	ws.send("something");
-});
+}); */
 
 const createWindow = () => {
 	win = new BrowserWindow({
