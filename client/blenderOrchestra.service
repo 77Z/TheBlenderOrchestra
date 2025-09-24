@@ -1,0 +1,17 @@
+[Unit]
+Description=Blender Orchestra Client
+After=network.target
+
+[Service]
+Type=simple
+User=blender
+Group=blender
+Restart=on-failure
+RestartSec=5
+ExecStart=/usr/local/bin/blender-orchestra-client
+WorkingDirectory=/opt/blender-orchestra
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

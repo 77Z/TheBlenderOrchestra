@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Orchestrator</title>
+		<link rel="stylesheet" href="./main.css">
+	</head>
+	<body>
+		<h1>The Blender Orchestra</h1>
+
+		<p id="serverStatus">Orchestrator server not running :(</p>
+
+		<div class="sections">
+			<div class="section">
+				<h3>Compute Nodes</h3>
+			</div>
+	
+			<div class="section">
+				<h3>Blend files to compute</h3>
+			</div>
+
+			<div class="section">
+				<h3>Output files</h3>
+			</div>
+		</div>
+
+		<div class="actions">
+			<h3>Actions</h3>
+			<button id="pullFilesBtn">Pull files from USB</button>
+
+			<button id="startComputeBtn">Start Compute</button>
+
+			<button id="clearLocalBlendFilesBtn">Clear local blend files</button>
+		</div>
+	</body>
+</html>
