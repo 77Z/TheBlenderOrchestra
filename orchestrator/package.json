@@ -4,7 +4,7 @@
   "description": "Orchestrator",
   "license": "MIT",
   "author": "Vince R",
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "electron": "^38.1.2",
+    "esbuild": "0.25.10",
     "typescript": "^5.0.0"
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-const CLIENT_CONFIG_URL = "https://";
+const CLIENT_CONFIG_URL = "https://gist.github.com/77Z/7274de673588cc81af99d272bfb245e1/raw/d4723d76e6e3fefdd0fceb16dafbb0a8e93b61ca/clientConfig.json";
 
 interface TopologicalMachine {
 	machineName: string;
@@ -39,9 +39,8 @@ async function fetchConfig(url: string): Promise<ClientConfig> {
 
 function canBlenderUseCuda(blenderBinary: string): boolean {
 
-	// Messy impl but it does the job
 	const cmd = new Deno.Command(blenderBinary, {
-		args: [`-b`, `--python-expr`, `"import bpy; bpy.context.preferences.addons['cycles'].preferences.get_devices(); print('CUDA' in [d.type for d in bpy.context.preferences.addons['cycles'].preferences.devices])"`]
+		args: [`-b`, `--python-expr`, `import bpy; bpy.context.preferences.addons['cycles'].preferences.get_devices(); print('CUDA' in [d.type for d in bpy.context.preferences.addons['cycles'].preferences.devices])`]
 	});
 
 	const { code, stdout } = cmd.outputSync();
@@ -58,7 +57,35 @@ const config: ClientConfig = await fetchConfig(CLIENT_CONFIG_URL);
 
 const cudaSupported = canBlenderUseCuda(config.blenderBinary);
 
-// const ws = new WebSocket("ws://" + config.orchestratorAddress);
+let ws: WebSocket;
+while (true) {
+	try {
+		ws = new WebSocket("ws://" + config.orchestratorAddress + ":8080");
+		
+		await new Promise((resolve, reject) => {
+			ws.onopen = () => resolve(undefined);
+			ws.onerror = () => reject(new Error("socket connection failed"));
+		});
+		
+		break; // Connection successful, exit loop
+	} catch (error) {
+		console.error("socket connection failed:", error);
+		console.log("Retrying in 20 seconds...");
+		await new Promise((resolve) => setTimeout(resolve, 20000));
+	}
+}
+
+ws.onopen = () => {
+	console.log("Connected to orchestrator");
+
+	ws.send(JSON.stringify({
+		type: "status-update",
+		payload: {
+			cuda: cudaSupported,
+		}
+	}));
+}
+
 
 
 console.log(cudaSupported);

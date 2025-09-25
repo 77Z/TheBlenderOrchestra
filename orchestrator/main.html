@@ -14,14 +14,17 @@
 				<h3>Compute Nodes</h3>
 				<p id="serverStatus">Orchestrator server offline :( something broke!</p>
 				<hr>
+				<div id="nodes"></div>
 			</div>
 	
 			<div class="section">
 				<h3>Blend files to compute</h3>
+				<div id="blendFiles"></div>
 			</div>
 
 			<div class="section">
 				<h3>Output files</h3>
+				<div id="outputFiles"></div>
 			</div>
 		</div>
 
@@ -33,5 +36,8 @@
 
 			<button id="clearLocalBlendFilesBtn">Delete stored blend files</button>
 		</div>
+
+
+		<script src="./dist/renderer.js" type="module" defer></script>
 	</body>
 </html>

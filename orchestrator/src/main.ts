@@ -1,26 +1,31 @@
-import { app, BrowserWindow } from "electron";
-import { IncomingMessage } from "http";
-
+import { app, BrowserWindow, ipcMain } from "electron";
 import { WebSocketServer } from "ws";
 
 let win: BrowserWindow;
 
 const wss = new WebSocketServer({ port: 8080 });
 
+wss.on("listening", () => {
+	// document.getElementById("serverStatus")!.innerText = "Orchestrator server online!";
+});
 
-// wss.on("listening", () => {
-// 	win?.webContents.send("ws-listening");
-// });
+wss.on("connection", (ws, request) => {
+	console.log("Client connected");
 
-/* wss.on("connection", (ws, request, client: any) => {
-	ws.on("error", console.error);
+	const clientIP = request.socket.remoteAddress?.replace("::ffff:", "");
+	console.log("Client IP:", clientIP);
 
-	ws.on("message", (data) => {
-		console.log("received: %s", data);
+	ipcMain.emit("client-connected", clientIP);
+
+	ws.on("message", (message) => {
+		console.log("Received:", message);
 	});
 
-	ws.send("something");
-}); */
+	ws.on("close", () => {
+		console.log("Client disconnected");
+	});
+});
+
 
 const createWindow = () => {
 	win = new BrowserWindow({
