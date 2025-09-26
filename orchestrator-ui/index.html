@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+
+		<link rel="stylesheet" href="./main.css">
+	</head>
+	<body>
+		<h1>The Blender Orchestra</h1>
+
+		<div class="sections">
+			<div class="section">
+				<h3>Compute Nodes</h3>
+				<p id="serverStatus">Orchestrator server offline :( something broke!</p>
+				<hr>
+				<div id="nodes"></div>
+			</div>
+	
+			<div class="section">
+				<h3>Blend files to compute</h3>
+				<div id="blendFiles"></div>
+			</div>
+
+			<div class="section">
+				<h3>Output files</h3>
+				<div id="outputFiles"></div>
+			</div>
+		</div>
+
+		<div class="actions">
+			<h3>Actions</h3>
+			<button id="pullFilesBtn">Pull files from USB</button>
+
+			<button id="startComputeBtn">Start Compute</button>
+
+			<button id="clearLocalBlendFilesBtn">Delete stored blend files</button>
+		</div>
+
+		<script type="module">
+			let ws;
+
+			const onOpen = (ev) => {
+				console.log("Connected to orchestrator");
+				document.getElementById("serverStatus").innerHTML = "<span style='color: green;'>Orchestrator server running</span>";
+			}
+
+			const onMessage = (ev) => {
+				const data = JSON.parse(ev.data);
+				switch (data.type) {
+					case "systemStatus": {
+						updateSystemStatus(data.status);
+						updateBlendFilesList(data.blendFilesAvailable);
+						break;
+					}
+				}
+			}
+
+			setInterval(() => {
+				if (ws && ws.readyState === WebSocket.OPEN) {
+					ws.send(JSON.stringify({ type: "pollSystemStatus" }));
+				}
+			}, 1000);
+
+			while (true) {
+				try {
+					ws = new WebSocket("ws://localhost:8000");
+
+					await new Promise((resolve, reject) => {
+						ws.onopen = onOpen;
+						ws.onmessage = onMessage;
+						// should this resolve? probably
+						ws.onerror = () => {
+							document.getElementById("serverStatus").innerHTML = "<span style='color: red;'>Orchestrator server offline :( something broke!</span>";
+							reject(new Error("socket connection failed"));
+						}
+						ws.onclose = () => {
+							document.getElementById("serverStatus").innerHTML = "<span style='color: red;'>Orchestrator server offline :( something broke!</span>";
+							reject(new Error("socket connection closed"));
+						};
+					});
+
+					break; // Connection successful, exit loop
+				} catch (error) {
+					console.error("socket connection failed:", error);
+					console.log("Retrying in 2 seconds...");
+					await new Promise((resolve) => setTimeout(resolve, 2000));
+				}
+			}
+
+			function updateSystemStatus(status) {
+				const nodesDiv = document.getElementById("nodes");
+				// clear out old elements
+				nodesDiv.innerHTML = "";
+
+				status.forEach((node) => {
+					const nodeDiv = document.createElement("div");
+					nodeDiv.innerHTML = `${node.id} · Status: ${node.status} · Current Task: ${node.currentTask} · Hardware Acceleration: ${node.advertisesHardwareAcceleration}`;
+					nodesDiv.appendChild(nodeDiv);
+				});
+			}
+
+			function updateBlendFilesList(blendFiles) {
+				const blendFilesDiv = document.getElementById("blendFiles");
+				// clear out old elements
+				blendFilesDiv.innerHTML = "";
+
+				blendFiles.forEach((file) => {
+					const fileDiv = document.createElement("div");
+					fileDiv.innerHTML = `${file}`;
+					blendFilesDiv.appendChild(fileDiv);
+				});
+			}
+
+			document.getElementById("pullFilesBtn").onclick = () => {
+				if (ws && ws.readyState === WebSocket.OPEN) {
+					ws.send(JSON.stringify({ type: "pullFromUSB" }));
+				}
+			};
+
+			document.getElementById("startComputeBtn").onclick = () => {
+				if (ws && ws.readyState === WebSocket.OPEN) {
+					ws.send(JSON.stringify({ type: "startCompute" }));
+				}
+			};
+		</script>
+	</body>
+</html>
