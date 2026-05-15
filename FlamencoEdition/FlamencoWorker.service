@@ -1,0 +1,15 @@
+[Unit]
+Description=Blender Flamenco Worker
+After=BlenderNetworkMount.service
+Requires=BlenderNetworkMount.service
+
+[Service]
+Type=simple
+ExecStart=/opt/flamenco/flamenco-worker -manager http://192.168.1.10:8080
+Restart=on-failure
+RestartSec=5
+User=1000
+Group=1000
+
+[Install]
+WantedBy=multi-user.target

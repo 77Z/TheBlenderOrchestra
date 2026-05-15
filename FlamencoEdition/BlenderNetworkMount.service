@@ -1,0 +1,14 @@
+[Unit]
+Description=Remote directory mount for Flamenco
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=1000
+ExecStart=/usr/bin/bash -c 'echo password | sshfs -o password_stdin paradis1@192.168.1.10:/mnt/BlenderSharedWork /mnt/BlenderSharedWork -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3'
+ExecStop=/bin/fusermount -u /mtn/BlenderSharedWork
+
+[Install]
+WantedBy=multi-user.target
